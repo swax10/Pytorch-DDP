@@ -10,15 +10,19 @@ import torch
 from torch.utils.data import Dataset
 
 class CustomDataset(Dataset):
-    def __init__(self, json_file):
+    def __init__(self, json_file, transform=None):
         with open(json_file, 'r') as f:
             self.data = json.load(f)
+        self.transform = transform
         
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
-        item = self.data[idx]
-        features = torch.tensor(item['features'], dtype=torch.float32)
-        label = torch.tensor(item['label'], dtype=torch.float32)
+        features = torch.tensor(self.data[idx]['features'], dtype=torch.float32)
+        label = torch.tensor(self.data[idx]['label'], dtype=torch.long)
+        
+        if self.transform:
+            features = self.transform(features)
+        
         return features, label
