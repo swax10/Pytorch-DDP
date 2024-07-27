@@ -67,19 +67,22 @@ def setup(rank, world_size):
         This function doesn't return any value, but it sets up the distributed
         environment as a side effect.
     """
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
+    dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    
     if rank == 0:
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
-        ip_address = torch.tensor(ip_address.encode(), dtype=torch.uint8)
+        ip_address = torch.tensor([int(x) for x in ip_address.split('.')], dtype=torch.uint8)
     else:
-        ip_address = torch.zeros(15, dtype=torch.uint8)  # Assuming IPv4 address
+        ip_address = torch.zeros(4, dtype=torch.uint8)
 
     dist.broadcast(ip_address, src=0)
     
-    master_addr = ip_address.cpu().numpy().tobytes().decode().rstrip('\x00')
-    os.environ['MASTER_ADDR'] = master_addr
-    os.environ['MASTER_PORT'] = '12355'
-    dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    if rank != 0:
+        master_addr = '.'.join(map(str, ip_address.tolist()))
+        os.environ['MASTER_ADDR'] = master_addr
 
 def cleanup():
     """
