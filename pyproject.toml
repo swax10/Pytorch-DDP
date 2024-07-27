@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pytorch ddp"
+version = "0.1.0"
+description = ""
+authors = ["Shreyas Waghmode"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+torch = { version = "=2.4.0+cpu", source = "pytorch" }
+numpy = "^1.26.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu/"
+priority = "supplemental"
